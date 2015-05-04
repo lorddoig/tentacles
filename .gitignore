@@ -4,7 +4,10 @@ pom.xml
 /classes/
 .lein-deps-sum
 testinfo.clj
+testinfo.edn
 .lein*
 target/
 docs/
 .nrepl-port
+*.iml
+dev-resources/public/js
