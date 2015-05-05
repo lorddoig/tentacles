@@ -1,6 +1,8 @@
 (ns tentacles.gists-test
-  (:use clojure.test)
-  (:require [tentacles.gists :as gists]))
+  (:require
+    [tentacles.gists :as gists]
+    #+clj [clojure.test :refer [deftest is]]
+    #+cljs [cemerick.cljs.test :refer-macros [deftest is]]))
 
 (def gist {:files {:file1 {:filename "file1" :content "content1" :type "text/plain"} :file2 {:filename "file2" :content "content2"}}})
 

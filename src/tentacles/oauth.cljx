@@ -1,5 +1,6 @@
 (ns tentacles.oauth
-  (:use [tentacles.core :only [api-call no-content?]]))
+  (:use [tentacles.core :only [api-call]]
+        [tentacles.util :only [no-content?]]))
 
 (defn authorizations
   "List your authorizations."

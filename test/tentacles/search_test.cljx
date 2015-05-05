@@ -1,6 +1,8 @@
 (ns tentacles.search-test
-  (:require [clojure.test :refer [deftest is]]
-            [tentacles.search :refer [search-term]]))
+  (:require
+    [tentacles.search :refer [search-term]]
+    #+clj [clojure.test :refer [deftest is]]
+    #+cljs [cemerick.cljs.test :refer-macros [deftest is]]))
 
 (deftest query-should-not-contains-text-keyword
   (is (= "foo bar language:clojure language:scala"

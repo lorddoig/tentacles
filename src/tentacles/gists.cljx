@@ -1,6 +1,7 @@
 (ns tentacles.gists
   "Implements the Github Gists API: http://developer.github.com/v3/gists/"
-  (:use [tentacles.core :only [api-call no-content?]]))
+  (:use [tentacles.core :only [api-call]]
+        [tentacles.util :only [no-content?]]))
 
 ;; ## Primary gist API
 

@@ -1,6 +1,7 @@
 (ns tentacles.issues
   "Implements the Github Issues API: http://developer.github.com/v3/issues/"
-  (:use [tentacles.core :only [api-call no-content?]]
+  (:use [tentacles.core :only [api-call]]
+        [tentacles.util :only [no-content?]]
         [clojure.string :only [join]]))
 
 ;; Some API requests, namely GET ones, require that labels be passed as a

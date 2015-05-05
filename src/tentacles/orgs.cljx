@@ -1,6 +1,7 @@
 (ns tentacles.orgs
   "Implements the Github Orgs API: http://developer.github.com/v3/orgs/"
-  (:use [tentacles.core :only [api-call no-content?]]))
+  (:use [tentacles.core :only [api-call]]
+        [tentacles.util :only [no-content?]]))
 
 ;; ## Primary API
 

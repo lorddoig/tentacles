@@ -1,11 +1,13 @@
 (ns tentacles.repos
   "Implements the Github Repos API: http://developer.github.com/v3/repos/"
   (:refer-clojure :exclude [keys])
+  #+clj
   (:require [clojure.data.codec.base64 :as b64])
-  (:use [clj-http.client :only [post put]]
-        [clojure.java.io :only [file]]
-        [tentacles.core :only [api-call no-content? raw-api-call]]
-        [cheshire.core :only [generate-string]]))
+  (:use #+clj [clj-http.client :only [post put]]
+        #+clj [clojure.java.io :only [file]]
+        [tentacles.core :only [api-call raw-api-call]]
+        [tentacles.util :only [no-content?]]
+        #+clj [cheshire.core :only [generate-string]]))
 
 ;; ## Primary Repos API
 
@@ -216,36 +218,38 @@
   [user repo id options]
   (no-content? (api-call :delete "repos/%s/%s/downloads/%s" [user repo id] options)))
 
-;; Github uploads are a two step process. First we get a download resource and then
-;; we use that to upload the file.
-(defn download-resource
-  "Get a download resource for a file you want to upload. You can pass it
-   to upload-file to actually upload your file."
-  [user repo path options]
-  (let [path (file path)]
-    (assoc (api-call :post "repos/%s/%s/downloads"
-                     [user repo]
-                     (assoc options
-                       :name (.getName path)
-                       :size (.length path)))
-      :filepath path)))
+#+clj
+(do
+  ;; Github uploads are a two step process. First we get a download resource and then
+  ;; we use that to upload the file.
+  (defn download-resource
+    "Get a download resource for a file you want to upload. You can pass it
+     to upload-file to actually upload your file."
+    [user repo path options]
+    (let [path (file path)]
+      (assoc (api-call :post "repos/%s/%s/downloads"
+                       [user repo]
+                       (assoc options
+                         :name (.getName path)
+                         :size (.length path)))
+        :filepath path)))
 
-;; This isn't really even a Github API call, since it calls an Amazon API.
-;; As such, it doesn't provide the same guarentees as the rest of the API.
-;; We'll just return the raw response.
-(defn upload-file
-  "Upload a file given a download resource obtained from download-resource."
-  [resp]
-  (post (:s3_url resp)
-        {:multipart [["key" (:path resp)]
-                     ["acl" (:acl resp)]
-                     ["success_action_status" "201"]
-                     ["Filename" (:name resp)]
-                     ["AWSAccessKeyId" (:accesskeyid resp)]
-                     ["Policy" (:policy resp)]
-                     ["Signature" (:signature resp)]
-                     ["Content-Type" (:mime_type resp)]
-                     ["file" (:filepath resp)]]}))
+  ;; This isn't really even a Github API call, since it calls an Amazon API.
+  ;; As such, it doesn't provide the same guarentees as the rest of the API.
+  ;; We'll just return the raw response.
+  (defn upload-file
+    "Upload a file given a download resource obtained from download-resource."
+    [resp]
+    (post (:s3_url resp)
+          {:multipart [["key" (:path resp)]
+                       ["acl" (:acl resp)]
+                       ["success_action_status" "201"]
+                       ["Filename" (:name resp)]
+                       ["AWSAccessKeyId" (:accesskeyid resp)]
+                       ["Policy" (:policy resp)]
+                       ["Signature" (:signature resp)]
+                       ["Content-Type" (:mime_type resp)]
+                       ["file" (:filepath resp)]]})))
 
 ;; Repo Forks API
 
@@ -394,6 +398,7 @@
 
 ;; ## PubSubHubbub
 
+#+clj
 (defn pubsubhubub
   "Create or modify a pubsubhubub subscription.
    Options are:
@@ -417,9 +422,11 @@
 
 ;; ## Repo Contents API
 
-(defn- decode-b64
-  "Decodes a base64 encoded string in a response"
-  ([res str? path]
+#+clj
+(do
+  (defn- decode-b64
+    "Decodes a base64 encoded string in a response"
+    ([res str? path]
      (if (and (map? res) (= (:encoding res) "base64"))
        (if-let [^String encoded (get-in res path)]
          (if (not (empty? encoded))
@@ -431,28 +438,28 @@
            res)
          res)
        res))
-  ([res str?] (decode-b64 res str? [:content]))
-  ([res] (decode-b64 res false [:content])))
+    ([res str?] (decode-b64 res str? [:content]))
+    ([res] (decode-b64 res false [:content])))
 
-(defn readme
-  "Get the preferred README for a repository.
-   Options are:
-      ref  -- The name of the Commit/Branch/Tag. Defaults to master.
-      str? -- Whether the content should be decoded to String. Defaults to true."
-  [user repo {:keys [str?] :or {str? true} :as options}]
-  (decode-b64
-   (api-call :get "repos/%s/%s/readme" [user repo] (dissoc options :str?))
-   str?))
+  (defn readme
+    "Get the preferred README for a repository.
+     Options are:
+        ref  -- The name of the Commit/Branch/Tag. Defaults to master.
+        str? -- Whether the content should be decoded to String. Defaults to true."
+    [user repo {:keys [str?] :or {str? true} :as options}]
+    (decode-b64
+      (api-call :get "repos/%s/%s/readme" [user repo] (dissoc options :str?))
+      str?))
 
-(defn contents
-  "Get the contents of any file or directory in a repository.
-   Options are:
-      ref  -- The name of the Commit/Branch/Tag. Defaults to master.
-      str? -- Whether the content should be decoded to a String. Defaults to false (ByteArray)."
-  [user repo path {:keys [str?] :as options}]
-  (decode-b64
-   (api-call :get "repos/%s/%s/contents/%s" [user repo path] (dissoc options :str?))
-   str?))
+  (defn contents
+    "Get the contents of any file or directory in a repository.
+     Options are:
+        ref  -- The name of the Commit/Branch/Tag. Defaults to master.
+        str? -- Whether the content should be decoded to a String. Defaults to false (ByteArray)."
+    [user repo path {:keys [str?] :as options}]
+    (decode-b64
+      (api-call :get "repos/%s/%s/contents/%s" [user repo path] (dissoc options :str?))
+      str?)))
 
 (defn archive-link
   "Get a URL to download a tarball or zipball archive for a repository.

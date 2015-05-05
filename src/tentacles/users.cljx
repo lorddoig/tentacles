@@ -1,7 +1,8 @@
 (ns tentacles.users
   "Implement the Github Users API: http://developer.github.com/v3/users/"
   (:refer-clojure :exclude [keys])
-  (:use [tentacles.core :only [api-call no-content?]]))
+  (:use [tentacles.core :only [api-call]]
+        [tentacles.util :only [no-content?]]))
 
 (defn users
   "Get info about all users."
