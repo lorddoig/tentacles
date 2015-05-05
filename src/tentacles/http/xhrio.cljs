@@ -10,8 +10,6 @@
   (:import goog.net.XhrIo))
 
 (defn exec-single-request*
-  "Asynchronously performs the request, passes it through *wrap-response-fn*, and
-  returns the output of calling safe-parse on it."
   [req]
   (let [ret (chan)
         to-resp (fn [resp] {:headers (lower-case-keys (js->clj (.getResponseHeaders resp)))
